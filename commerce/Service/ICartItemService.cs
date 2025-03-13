@@ -11,5 +11,6 @@ namespace commerce.Services
         Task<CartItem> GetCartItemByIdAsync(int cartItemId);
         Task UpdateCartItemAsync(CartItem cartItem);
         Task DeleteCartItemAsync(int cartItemId);
+        Task<decimal> GetTotalPriceByCartIdAsync(int cartId);
     }
 }

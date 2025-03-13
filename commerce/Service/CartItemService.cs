@@ -28,6 +28,18 @@ namespace commerce.Services
         {
             return await _cartItemRepository.GetCartItemByIdAsync(cartItemId);
         }
+        public async Task<decimal> GetTotalPriceByCartIdAsync(int cartId)
+        {
+            var cartItems = await _cartItemRepository.GetCartItemsByCartIdAsync(cartId);
+            decimal totalPrice = 0;
+
+            foreach (var item in cartItems)
+            {
+                totalPrice += item.Quantity * item.Product.Price;
+            }
+
+            return totalPrice;
+        }
 
         public async Task UpdateCartItemAsync(CartItem cartItem)
         {

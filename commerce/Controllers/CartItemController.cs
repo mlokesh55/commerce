@@ -18,15 +18,19 @@ namespace commerce.Controllers
             _cartItemService = cartItemService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddCartItem(CartItem cartItem)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CartItem>> GetCartItem(int id)
         {
             try
             {
-                await _cartItemService.AddCartItemAsync(cartItem);
-                return CreatedAtAction(nameof(GetCartItem), new { id = cartItem.CartItemId }, cartItem);
+                var cartItem = await _cartItemService.GetCartItemByIdAsync(id);
+                if (cartItem == null)
+                {
+                    return NotFound();
+                }
+                return Ok(cartItem);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -40,30 +44,27 @@ namespace commerce.Controllers
                 var items = await _cartItemService.GetCartItemsByCartIdAsync(cartId);
                 return Ok(items);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
         }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CartItem>> GetCartItem(int id)
+        //total price 
+        [HttpGet("cart/{cartId}/total")]
+        public async Task<ActionResult<decimal>> GetTotalPriceByCartId(int cartId)
         {
             try
             {
-                var cartItem = await _cartItemService.GetCartItemByIdAsync(id);
-                if (cartItem == null)
-                {
-                    return NotFound();
-                }
-                return Ok(cartItem);
+                var totalPrice = await _cartItemService.GetTotalPriceByCartIdAsync(cartId);
+                return Ok(new { TotalPrice = totalPrice });
             }
-            catch (Exception ex)
+            catch (Exception )
             {
+                // Log the exception
                 return StatusCode(500, "Internal server error");
             }
         }
-
+        //update data
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCartItem(int id, CartItem cartItem)
         {
@@ -77,12 +78,54 @@ namespace commerce.Controllers
                 await _cartItemService.UpdateCartItemAsync(cartItem);
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
         }
 
+
+        //inserting data
+        //[HttpPost]
+        //public async Task<IActionResult> AddCartItem(CartItem cartItem)
+        //{
+        //    try
+        //    {
+        //        await _cartItemService.AddCartItemAsync(cartItem);
+        //        return CreatedAtAction(nameof(GetCartItem), new { id = cartItem.CartItemId }, cartItem);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, "Internal server error");
+        //    }
+        //}
+        [HttpPost]
+        public async Task<IActionResult> AddCartItem(CartItemDto cartItemDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var cartItem = new CartItem
+                {
+                    CartId = cartItemDto.CartId,
+                    ProductId = cartItemDto.ProductId,
+                    Quantity = cartItemDto.Quantity
+                };
+
+                await _cartItemService.AddCartItemAsync(cartItem);
+                return CreatedAtAction(nameof(GetCartItem), new { id = cartItem.CartItemId }, cartItem);
+            }
+            catch (Exception )
+            {
+                // Log the exception
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        //delete data
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCartItem(int id)
         {
@@ -91,10 +134,11 @@ namespace commerce.Controllers
                 await _cartItemService.DeleteCartItemAsync(id);
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
         }
+
     }
 }
