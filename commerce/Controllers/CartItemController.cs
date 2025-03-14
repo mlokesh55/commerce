@@ -18,6 +18,7 @@ namespace commerce.Controllers
             _cartItemService = cartItemService;
         }
 
+
         [HttpGet("{id}")]
         public async Task<ActionResult<CartItem>> GetCartItem(int id)
         {
@@ -36,6 +37,7 @@ namespace commerce.Controllers
             }
         }
 
+
         [HttpGet("cart/{cartId}")]
         public async Task<ActionResult<IEnumerable<CartItem>>> GetCartItemsByCartId(int cartId)
         {
@@ -49,14 +51,24 @@ namespace commerce.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+
         //total price 
         [HttpGet("cart/{cartId}/total")]
         public async Task<ActionResult<decimal>> GetTotalPriceByCartId(int cartId)
         {
             try
             {
+                var cartItems = await _cartItemService.GetCartItemsByCartIdAsync(cartId);
+
+                if (cartItems == null || !cartItems.Any())
+                {
+                    return NotFound(new { Message = "Cart not found or is empty." });
+                }
+
                 var totalPrice = await _cartItemService.GetTotalPriceByCartIdAsync(cartId);
-                return Ok(new { TotalPrice = totalPrice });
+                return Ok(new{TotalPrice = totalPrice});
+
             }
             catch (Exception )
             {
@@ -64,6 +76,8 @@ namespace commerce.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+
         //update data
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCartItem(int id, CartItem cartItem)
@@ -100,6 +114,7 @@ namespace commerce.Controllers
         //    }
         //}
         [HttpPost]
+        //[Consumes(MultipartFormDataContent)]
         public async Task<IActionResult> AddCartItem(CartItemDto cartItemDto)
         {
             if (!ModelState.IsValid)
