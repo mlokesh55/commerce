@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using commerce.Models;
 
 namespace commerce.Models
@@ -33,6 +34,7 @@ namespace commerce.Models
         [Required]
         public required string Role { get; set; }
 
-        public required ShoppingCart ShoppingCart { get; set; }
+        [JsonIgnore]
+        public  ShoppingCart ShoppingCart { get; set; }
     }
 }

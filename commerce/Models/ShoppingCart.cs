@@ -14,7 +14,7 @@ namespace commerce.Models
         public int UserId { get; set; }
 
         [ForeignKey("UserId")]
-        public required User User { get; set; }
+        public  User User { get; set; }
 
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
     }
